@@ -37,9 +37,8 @@ function mymedia_extends_navigation($navigation) {
     $context = get_context_instance(CONTEXT_USER, $USER->id);
 
     if ($node_home && has_capability('local/mymedia:view', $context, $USER)) {
-        $node_mymedia = $node_home->add($mymedia, new moodle_url('/local/mymedia/mymedia.php'), 60, $mymedia, 'mymedia');
-
-        //$node_mymedia_upload = $node_mymedia->add($upload, new moodle_url('/local/mymedia/mymedia.php'), 60, $upload, 'upload');
+        $node_mymedia = $node_home->add($mymedia, new moodle_url('/local/mymedia/mymedia.php'),
+                                        navigation_node::NODETYPE_LEAF, $mymedia, 'mymedia');
     }
 }
 

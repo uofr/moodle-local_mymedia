@@ -49,7 +49,7 @@ if (!empty($share)) {
 }
 
 if (empty($entry_id)) {
-    add_to_log(1, 'local_mymedia', 'update - video details', '', 'video entry id empty ' . $entry_id);
+    add_to_log(SITEID, 'local_mymedia', 'update - video details', '', 'video entry id empty ' . $entry_id);
     echo 'n 1';
     die();
 }
@@ -64,10 +64,10 @@ $entries = new KalturaStaticEntries();
 
 try {
     // Create a Kaltura connection object
-    $client_obj = login(true, '');
+    $client_obj = local_kaltura_login(true, '');
 
     if (!$client_obj) {
-        add_to_log(1, 'local_mymedia', 'view - connection failed', '', 'Connection failed when saving');
+        add_to_log(SITEID, 'local_mymedia', 'view - connection failed', '', 'Connection failed when saving');
         echo 'n 3';
     }
 
@@ -94,11 +94,11 @@ try {
     $client_obj->media->update('{1:result:id}', $media_entry);
 
     // Get the custom metadata profile id from the repository configuration setting
-    $metadata_profile_id = get_config(PLUGIN_NAME, 'metadata_profile_id');
+    $metadata_profile_id = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'metadata_profile_id');
 
     // Verify the repository plug-in is configured correctly
     if (!$metadata_profile_id) {
-        add_to_log(1, 'local_mymedia', 'view - metadata profile id', '', 'Kaltura repo not set up properly');
+        add_to_log(SITEID, 'local_mymedia', 'view - metadata profile id', '', 'Kaltura repo not set up properly');
         echo 'n 4';
         die();
     }
@@ -118,32 +118,32 @@ try {
 
     // Verify returned data
     if (!is_array($result)) {
-        add_to_log(1, 'local_mymedia', 'view - connection failed', '', 'Connection failed when saving');
+        add_to_log(SITEID, 'local_mymedia', 'view - connection failed', '', 'Connection failed when saving');
         echo 'n 5';
         die();
     }
 
     // Verify the first API call
     if (!array_key_exists(0, $result) || !$result[0] instanceof KalturaMediaEntry) {
-        add_to_log(1, 'local_mymedia', 'view - media->get', '', $result[0]['message']);
+        add_to_log(SITEID, 'local_mymedia', 'view - media->get', '', $result[0]['message']);
         echo 'n 6';
         die();
     }
 
     if (0 != strcmp($result[0]->userId, $USER->username)) { // Verify that the user is the owner of the requested video
-        add_to_log(1, 'local_mymedia', 'update - video details', '', 'User is not the owner of video');
+        add_to_log(SITEID, 'local_mymedia', 'update - video details', '', 'User is not the owner of video');
         echo 'n 7';
         die();
     }
 
     if (!array_key_exists(1, $result) || !$result[1] instanceof KalturaMediaEntry) {
-        add_to_log(1, 'local_mymedia', 'update - media->update', '', $result[1]['message']);
+        add_to_log(SITEID, 'local_mymedia', 'update - media->update', '', $result[1]['message']);
         echo 'n 8';
         die();
     }
 
     if (!array_key_exists(2, $result) || !$result[2] instanceof KalturaMetadataListResponse) {
-        add_to_log(1, 'local_mymedia', 'update - metadata->listaction', '', $result[2]['message']);
+        add_to_log(SITEID, 'local_mymedia', 'update - metadata->listaction', '', $result[2]['message']);
         echo 'n 9';
     }
 
@@ -165,12 +165,12 @@ try {
 
         // Create site share XML schema
         if ($site_share) {
-            $final_xml .= create_site_share_metadata_xml($gshare);
+            $final_xml .= repository_kaltura_create_site_share_metadata_xml($gshare);
         }
 
         // Create course share XML schema
         if ($course_share) {
-            $final_xml .= create_course_share_metadata_xml($share);
+            $final_xml .= repository_kaltura_create_course_share_metadata_xml($share);
         }
 
         $final_xml .= '</metadata>';
@@ -187,7 +187,7 @@ try {
         }
 
         if (!$metadata instanceof KalturaMetadata) {
-            add_to_log(1, 'local_mymedia', 'update - metadata->update/add', '', 'Error adding/updating custom metadata');
+            add_to_log(SITEID, 'local_mymedia', 'update - metadata->update/add', '', 'Error adding/updating custom metadata');
             echo 'n 10';
             die();
         }
@@ -203,6 +203,8 @@ try {
 
 } catch (Exception $exp) {
 
-    add_to_log(1, 'local_mymedia', 'Error - exception caught', '', $exp->getMessage());
+    add_to_log(SITEID, 'local_mymedia', 'Error - exception caught', '', $exp->getMessage());
     echo 'n';
 }
+
+die();

@@ -70,6 +70,14 @@ $capabilities = array(
         )
     ),
 
+    'local/mymedia:screenrecorder'  => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_USER,
+        'archetypes' => array(
+            'user' => CAP_ALLOW
+        )
+    ),
+
 /*    'local/mymedia:delete' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_USER,

@@ -45,7 +45,7 @@ $entry_obj    = null;
 // the entry object status
 if (0 == strcmp($widget, 'kdp')) {
 
-    $entry_obj = get_ready_entry_object($entry_id, false);
+    $entry_obj = local_kaltura_get_ready_entry_object($entry_id, false);
 
     if (empty($entry_obj)) { // Sometimes the connection to Kaltura times out
         $data->markup = get_string('video_retrival_error', 'local_mymedia');
@@ -53,8 +53,8 @@ if (0 == strcmp($widget, 'kdp')) {
     }
 
     // Determine the type of video (See KALDEV-28)
-    if (!video_type_valid($entry_obj)) {
-        $entry_obj = get_ready_entry_object($entry_obj->id, false);
+    if (!local_kaltura_video_type_valid($entry_obj)) {
+        $entry_obj = local_kaltura_get_ready_entry_object($entry_obj->id, false);
     }
 
     $entry_obj->height = !empty($height) ? $height : $entry_obj->height;
@@ -66,9 +66,9 @@ if (0 == strcmp($widget, 'kdp')) {
 
     // Retrieve the video's custom metadata TODO: Eventually use the connection object everywhere
     $kaltura = new kaltura_connection();
-    $connection = $kaltura->get_connection(true, 86400);
+    $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
 
-    list($site_share, $course_share) = format_video_custom_metadata($connection, $entry_obj->id);
+    list($site_share, $course_share) = repository_kaltura_format_video_custom_metadata($connection, $entry_obj->id);
 
     $data->course_share = $course_share;
     $data->site_share   = $site_share;
@@ -76,11 +76,11 @@ if (0 == strcmp($widget, 'kdp')) {
     if (KalturaEntryStatus::READY == (string) $entry_obj->status) {
 
         // Create the user KS session
-        $session  = generate_kaltura_session(array($entry_obj->id));
+        $session  = local_kaltura_generate_kaltura_session(array($entry_obj->id));
 
-        $data->markup = get_kdp_code($entry_obj, $uiconfid, $courseid, $session);
+        $data->markup = local_kaltura_get_kdp_code($entry_obj, $uiconfid, $courseid, $session);
 
-        if (has_mobile_flavor_enabled() && get_enable_html5()) {
+        if (local_kaltura_has_mobile_flavor_enabled() && local_kaltura_get_enable_html5()) {
             $data->script = 'kAddedScript = false; kCheckAddScript();';
         }
 
@@ -111,3 +111,5 @@ if (0 == strcmp($widget, 'kdp')) {
 $data = json_encode($data);
 
 echo $data;
+
+die();
