@@ -2,9 +2,9 @@ M.local_mymedia = {};
 
 M.local_mymedia.init_config = function (Y, panel_markup, dialog, conversion_script, save_video_script,
                                         uiconf_id, kcw_panel_markup, kcw_markup, loading_panel, edit_meta, 
-                                        edit_share_course, edit_share_site) {
+                                        edit_share_course, edit_share_site, kaltura_partner_id, kaltura_session) {
     
-    var body_node = Y.one("#page-site-index");
+    var body_node = Y.one("#page-mymedia-index");
     
     body_node.append(dialog);
     body_node.append(kcw_panel_markup);
@@ -74,12 +74,11 @@ M.local_mymedia.init_config = function (Y, panel_markup, dialog, conversion_scri
                 dialog.cfg.setProperty("text", M.util.get_string("upload_success", "local_mymedia"));
                 var button = [
                                  { text: M.util.get_string("continue", "local_mymedia"),
-                                   handler: function close_dialog() { this.hide(); window.location.href = window.location.href; },
+                                   handler: function close_dialog() {  this.hide(); window.location.href = window.location.href; },
                                    isDefault: true
                                  }
                              ];
                 dialog.cfg.setProperty("buttons", button);
-                //dialog.cfg.queueProperty("buttons", myButtons);
                 document.getElementById("notification").innerHTML = '';
                 dialog.show();
             }
@@ -106,7 +105,7 @@ M.local_mymedia.init_config = function (Y, panel_markup, dialog, conversion_scri
                                                           fixedcenter:true,  
                                                           close:false,  
                                                           draggable:false,  
-                                                          zindex:4, 
+                                                          zIndex:100, 
                                                           modal:true, 
                                                           visible:false 
                                                          }  
@@ -126,6 +125,7 @@ M.local_mymedia.init_config = function (Y, panel_markup, dialog, conversion_scri
                                       visible: false,
                                       close: true,
                                       modal: true,
+                                      zIndex: 50,
                                       context: ["region-main", "tl", "tl", ["beforeShow", "windowResize"]]
                                     });
 
@@ -339,19 +339,18 @@ M.local_mymedia.init_config = function (Y, panel_markup, dialog, conversion_scri
             // Add okay button to dialog
             var button = [
                           { text: M.util.get_string("continue", "local_mymedia"),
-                            handler: function close_dialog() { this.hide(); },
+                            handler: function close_dialog() { details_panel.hide(); this.hide(); },
                             isDefault: true
                           }
                       ];
             
             dialog.cfg.setProperty("buttons", button);
          
-            // Re-eanble the save button
+            // Re-enable the save button
             Y.one('#id_video_details_save').set('disabled', false);
             
             loading_panel.hide();                        
             dialog.show();
-            
         }
     };
 
@@ -493,6 +492,5 @@ M.local_mymedia.init_config = function (Y, panel_markup, dialog, conversion_scri
         }
 
     }, 'a');
-    
     
 };

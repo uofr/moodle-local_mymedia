@@ -101,7 +101,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         echo $output;
     }
 
-    public function create_options_table_upper($page) {
+    public function create_options_table_upper($page, $partner_id = '', $login_session = '') {
         global $USER;
 
         $output = '';
@@ -119,18 +119,24 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         $upload        = '';
         $simple_search = '';
+        $screenrec     = '';
+        $enable_ksr    = get_config(KALTURA_PLUGIN_NAME, 'enable_screen_recorder');
 
         $context = get_context_instance(CONTEXT_USER, $USER->id);
 
         if (has_capability('local/mymedia:upload', $context, $USER)) {
             $upload = $this->create_upload_markup();
         }
+ 
+        if ($enable_ksr && has_capability('local/mymedia:screenrecorder', $context, $USER)) {
+            $screenrec = $this->create_screenrecorder_markup($partner_id, $login_session);
+        }
 
         if (has_capability('local/mymedia:search', $context, $USER)) {
             $simple_search = $this->create_search_markup();
         }
 
-        $output .= $upload . $simple_search;
+        $output .= $upload . '&nbsp;&nbsp;' . $screenrec . $simple_search;
 
         $output .= html_writer::end_tag('td');
 
@@ -615,7 +621,8 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         // Print beginning of div container
         $attr = array('id' => 'mymedia_course_list',
-                      'class' => 'mymedia course list checkboxes');
+                      'class' => 'mymedia course list checkboxes',
+                      );
 
         $output = html_writer::start_tag('div', $attr);
 
@@ -822,5 +829,48 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $output .= html_writer::end_tag('div');
 
         return $output;
+    }
+
+    public function create_screenrecorder_markup($partner_id, $login_session) {
+
+        $attr   = array('id' => 'screenrecorder_btn_container',
+                        'class' => 'mymedia screenrecorder button container');
+
+        $output = html_writer::start_tag('span', $attr);
+
+        $attr   = array('id' => 'scr_btn',
+                        'class' => 'mymedia screenrecorder button',
+                        'value'  => get_string('screenrecorder', 'local_mymedia'),
+                        'type' => 'button',
+                        'title' => get_string('screenrecorder', 'local_mymedia'),
+                        'onclick' => "document.getElementById('progress_bar_container').style.visibility = 'visible';".
+                                     "document.getElementById('slider_border').style.borderStyle = 'none';".
+                                     "kalturaScreenRecord.setDetectResultErrorMessageElementId('screenrecorder_btn_container');".
+                                     "kalturaScreenRecord.setDetectTextJavaDisabled('".get_string('javanotenabled', 'local_mymedia')."');".
+                                     "kalturaScreenRecord.setDetectTextmacLionNeedsInstall('".get_string('javanotenabled', 'local_mymedia')."');".
+                                     "kalturaScreenRecord.setDetectTextjavaNotDetected('".get_string('javanotenabled', 'local_mymedia')."');".
+                                     "kalturaScreenRecord.startKsr('{$partner_id}', '{$login_session}', 'false');"
+                       );
+
+        $output .= html_writer::empty_tag('input', $attr);
+
+        $output .= html_writer::end_tag('span');
+
+        // Add progress bar
+        $attr         = array('id' => 'progress_bar');
+        $progress_bar = html_writer::tag('span', '', $attr);
+
+        $attr          = array('id' => 'slider_border');
+        $slider_border = html_writer::tag('div', $progress_bar, $attr);
+
+        $attr          = array('id' => 'loading_text');
+        $loading_text  = html_writer::tag('div', get_string('scr_loading', 'local_mymedia'), $attr);
+
+        $attr   = array('id' => 'progress_bar_container',
+                        'style' => 'width:100px; padding-left:10px; padding-right:10px; visibility: hidden');
+        $output = $output . html_writer::tag('span', $slider_border . $loading_text, $attr);
+
+        return $output;
+
     }
 }
