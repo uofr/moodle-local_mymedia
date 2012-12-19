@@ -26,25 +26,26 @@ require_once('lib.php');
 
 require_login();
 
-global $SESSION;
+global $SESSION, $USER;
 
 $page          = optional_param('page', 0, PARAM_INT);
 $simple_search = '';
 $videos        = 0;
 
-$enabled = kaltura_repository_enabled();
+$enabled = local_kaltura_kaltura_repository_enabled();
 
 if ($enabled) {
     require_once(dirname(dirname(dirname(__FILE__))) . '/repository/kaltura/locallib.php');
 }
 
 $mymedia = get_string('heading_mymedia', 'local_mymedia');
-$header  = "$SITE->shortname: $mymedia";
+$PAGE->set_context(get_system_context());
+$header  = format_string($SITE->shortname).": $mymedia";
 
 $PAGE->set_url('/local/mymedia/mymedia.php');
 $PAGE->set_course($SITE);
 
-$PAGE->set_pagetype('site-index');
+$PAGE->set_pagetype('mymedia-index');
 $PAGE->set_pagelayout('frontpage');
 $PAGE->set_title($header);
 $PAGE->set_heading($header);
@@ -55,12 +56,30 @@ $PAGE->requires->js('/local/kaltura/js/swfobject.js', true);
 $PAGE->requires->js('/local/kaltura/js/kcwcallback.js', true);
 $PAGE->requires->css('/local/mymedia/css/mymedia.css');
 
+// Connect to Kaltura
+$kaltura = new kaltura_connection();
+$connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
+
+if (!$connection) {
+    $url = new moodle_url('/admin/settings.php', array('section' => 'local_kaltura'));
+    print_error('conn_failed', 'local_kaltura', $url);
+}
+
+$partner_id    = local_kaltura_get_partner_id();
+$login_session = '';
+
+// Include javascript for screen recording widget
+$uiconf_id  = local_kaltura_get_player_uiconf('mymedia_screen_recorder');
+$host = local_kaltura_get_host();
+$url = new moodle_url("{$host}/p/{$partner_id}/sp/{$partner_id}/ksr/uiconfId/{$uiconf_id}");
+$PAGE->requires->js($url, true);
+$PAGE->requires->js('/local/kaltura/js/screenrecorder.js', true);
 
 $courseid = get_courseid_from_context($PAGE->context);
 
-if (has_mobile_flavor_enabled() && get_enable_html5()) {
-    $uiconf_id = get_player_uiconf('player_resource');
-    $url = new moodle_url(htm5_javascript_url($uiconf_id));
+if (local_kaltura_has_mobile_flavor_enabled() && local_kaltura_get_enable_html5()) {
+    $uiconf_id = local_kaltura_get_player_uiconf('player_resource');
+    $url = new moodle_url(local_kaltura_htm5_javascript_url($uiconf_id));
     $PAGE->requires->js($url, true);
     $url = new moodle_url('/local/kaltura/js/frameapi.js');
     $PAGE->requires->js($url, true);
@@ -96,8 +115,13 @@ $renderer = $PAGE->get_renderer('local_mymedia');
 
 if ($enabled) {
     try {
-        $kaltura = new kaltura_connection();
-        $connection = $kaltura->get_connection(true, 86400);
+
+        if (!$connection) {
+            throw new Exception("Unable to connect");
+        }
+ 
+        // Required by screen recorder
+        $login_session = $connection->getKs();
 
         $per_page = get_config(KALTURA_PLUGIN_NAME, 'mymedia_items_per_page');
 
@@ -107,9 +131,9 @@ if ($enabled) {
 
         // Check if the sesison data is set
         if (isset($SESSION->mymedia) && !empty($SESSION->mymedia)) {
-            $videos = search_mymedia_videos($connection, $SESSION->mymedia, $page + 1, $per_page);
+            $videos = repository_kaltura_search_mymedia_videos($connection, $SESSION->mymedia, $page + 1, $per_page);
         } else {
-            $videos = search_mymedia_videos($connection, '', $page + 1, $per_page);
+            $videos = repository_kaltura_search_mymedia_videos($connection, '', $page + 1, $per_page);
         }
 
         $total = $videos->totalCount;
@@ -125,17 +149,18 @@ if ($enabled) {
                                         new moodle_url('/local/mymedia/mymedia.php'));
 
 
-            echo $renderer->create_options_table_upper($page);
+            echo $renderer->create_options_table_upper($page, $partner_id, $login_session);
 
             echo $renderer->create_vidoes_table($videos);
 
             echo $renderer->create_options_table_lower($page);
 
         } else {
-            add_to_log(1, 'local_mymedia', 'View - no videos', '', 'no videos');
-            echo get_string('no_videos', 'local_mymedia');
+            add_to_log(SITEID, 'local_mymedia', 'View - no videos', '', 'no videos');
 
             echo $renderer->create_options_table_upper($page);
+
+            echo '<center>'. get_string('no_videos', 'local_mymedia') . '</center>';
 
             echo $renderer->create_vidoes_table(array());
         }
@@ -152,8 +177,9 @@ if ($enabled) {
             'fullpath' => '/local/mymedia/js/mymedia.js',
             'requires' => array('base', 'dom', 'node',
                                 'event-delegate', 'yui2-container', 'yui2-animation',
-                                'yui2-dragdrop', 'tabview', 'json-parse-min',
-                                'collection'
+                                'yui2-dragdrop', 'tabview',
+                                'collection', 'io-base', 'json-parse',
+
                                 ),
             'strings' => array(array('video_converting',   'local_mymedia'),
                                array('loading',            'local_mymedia'),
@@ -176,27 +202,22 @@ if ($enabled) {
 
         $save_video_script = "../../local/mymedia/save_video_details.php?entry_id=";
         $conversion_script = "../../local/mymedia/check_conversion.php?courseid={$courseid}&entry_id=";
-        $kcw_markup        = get_kcw('mymedia_uploader', false);
+        $kcw_markup        = local_kaltura_get_kcw('mymedia_uploader', false);
         $kcw_panel_markup  = $renderer->create_kcw_panel_markup();
         $loading_markup    = $renderer->create_loading_screen_markup();
-        $uiconf_id = get_player_uiconf('player_filter');
+        $uiconf_id         = local_kaltura_get_player_uiconf('player_filter');
 
 
 
-        $PAGE->requires->js_init_call('M.local_mymedia.init_config', array($video_details,
-                                                                           $dialog,
-                                                                           $conversion_script,
-                                                                           $save_video_script,
-                                                                           $uiconf_id,
-                                                                           $kcw_panel_markup,
-                                                                           $kcw_markup,
-                                                                           $loading_markup,
-                                                                           $edit_meta,
-                                                                           $edit_course,
-                                                                           $edit_site), true, $jsmodule);
+        $PAGE->requires->js_init_call('M.local_mymedia.init_config', array($video_details, $dialog, $conversion_script,
+                                                                           $save_video_script, $uiconf_id,
+                                                                           $kcw_panel_markup, $kcw_markup,
+                                                                           $loading_markup, $edit_meta, $edit_course,
+                                                                           $edit_site
+                                                                          ), true, $jsmodule);
 
     } catch (Exception $exp) {
-        add_to_log(1, 'local_mymedia', 'View - error main page', '', $exp->getMessage());
+        add_to_log(SITEID, 'local_mymedia', 'View - error main page', '', $exp->getMessage());
         echo get_string('problem_viewing', 'local_mymedia');
     }
 

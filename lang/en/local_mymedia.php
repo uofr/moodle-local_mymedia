@@ -10,6 +10,7 @@ $string['mymedia:sharesite'] = 'Share video with site';
 $string['mymedia:upload'] = 'Upload a video';
 $string['mymedia:delete'] = 'Delete uploaded videos';
 $string['mymedia:clip'] = 'Create a clip of a video';
+$string['mymedia:screenrecorder'] = 'Screen recorder';
 
 // Navigation block
 $string['nav_mymedia'] = 'My Media';
@@ -37,7 +38,8 @@ $string['metadata_video_tags'] = 'Tags: ';
 $string['metadata_video_desc'] = 'Description: ';
 $string['video_converting'] = 'The video is still converting.  Please try again soon.';
 $string['loading'] = 'Loading... please wait';
-$string['save'] = 'Save';
+$string['scr_loading'] = 'Loading...';
+$string['save'] = 'Save & exit';
 $string['missing_required'] = 'Please enter a name for the video';
 $string['error_saving'] = 'There was an error saving the settings.  Please contact your system administrator.';
 $string['error_not_owner'] = 'You must be the owner of the video.  If you are please contact your system administrator.';
@@ -61,7 +63,7 @@ $string['delete_video_failed_not_owner'] = 'You cannot delete a video you do not
 $string['delete_video_not_exist'] = 'This video no longer exists';
 
 // Video Upload
-$string['upload'] = 'Upload';
+$string['upload'] = 'Upload media or record from webcam';
 $string['upload_success_hdr'] = 'Upload Success';
 $string['upload_success'] = 'Video uploaded successfully';
 
@@ -74,3 +76,7 @@ $string['search_text_tooltip'] = 'Enter video name or tags';
 $string['problem_viewing'] = 'There is a problem displaying the page.  Please try again or contact your site administrator';
 $string['no_videos'] = 'No videos found';
 $string['repository_enable'] = 'Please enable and configure the Kaltura repository plug-in';
+
+// Screen recording
+$string['screenrecorder'] = 'Record screen';
+$string['javanotenabled'] = 'Browser Java is disabled.  Please enable Java to use the screen recorder.';
