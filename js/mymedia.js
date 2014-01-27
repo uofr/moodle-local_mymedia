@@ -112,7 +112,7 @@ M.local_mymedia.init_config = function (Y, panel_markup, dialog, conversion_scri
                                                ); 
 
     loading_panel.setHeader("Loading, please wait..."); 
-    loading_panel.setBody('<img src="http://l.yimg.com/a/i/us/per/gr/gp/rel_interstitial_loading.gif" />');
+    loading_panel.setBody('<img src="https://urcourses.uregina.ca/local/kaltura/pix/rel_interstitial_loading.gif" />');
     loading_panel.render();
 
     // Create preview panel
