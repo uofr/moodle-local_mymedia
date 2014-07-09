@@ -154,7 +154,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $attr   = array('class' => 'mymedia upper row_0 upload search');
         $output .= html_writer::start_tag('tr', $attr);
 
-        $attr   = array('colspan' => 3, 'align' => 'right',
+        $attr   = array('colspan' => 3, 'align' => '',
                         'class' => 'mymedia upper col_0');
         $output .= html_writer::start_tag('td', $attr);
 
@@ -267,9 +267,18 @@ class local_mymedia_renderer extends plugin_renderer_base {
                          'height' => 100,
                          'width'  => 150,
                          'title' => $alt);
+        
+        $a_attr   = array('class' => 'mymedia video preview',
+                     'href' => '#',
+                     'title' => get_string('preview_link', 'local_mymedia')
+                     );
 
+        $output .= html_writer::start_tag('a', $a_attr);
+        
         $output .= html_writer::empty_tag('img', $attr);
 
+        $output .= html_writer::end_tag('a');
+        
         $output .= html_writer::end_tag('div');
 
         return $output;
@@ -316,7 +325,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $attr   = array('class' => 'mymedia video share container');
         $output .= html_writer::start_tag('span', $attr);
 
-        $attr   = array('class' => 'mymedia video share',
+        $attr   = array('class' => 'mymedia video share btn',
                         'href' => '#',
                         'title' => get_string('share_link', 'local_mymedia')
                         );
@@ -337,7 +346,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $attr   = array('class' => 'mymedia video edit container');
         $output .= html_writer::start_tag('span', $attr);
 
-        $attr   = array('class' => 'mymedia video edit',
+        $attr   = array('class' => 'mymedia video edit btn',
                         'href' => '#',
                         'title' => get_string('edit_link', 'local_mymedia')
                         );
@@ -355,7 +364,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         $output = '';
 
-        $attr   = array('class' => 'mymedia video clip container');
+        $attr   = array('class' => 'mymedia video clip container btn');
         $output .= html_writer::start_tag('span', $attr);
 
         $attr   = array('class' => 'mymedia video clip',
@@ -434,8 +443,8 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         $context = get_context_instance(CONTEXT_USER, $USER->id);
 
-        $output .= $this->create_video_preview_link_markup();
-        $output .= '&nbsp;&nbsp;';
+        //$output .= $this->create_video_preview_link_markup();
+        //$output .= '&nbsp;&nbsp;';
 
         if (has_capability('local/mymedia:editmetadata', $context, $USER)) {
             $output .= $this->create_video_edit_link_markup();
@@ -778,7 +787,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         global $SESSION;
 
         $attr   = array('id' => 'simple_search_container',
-                        'class' => 'mymedia simple search container');
+                        'class' => 'mymedia simple search');
 
         $output = html_writer::start_tag('span', $attr);
 
@@ -835,7 +844,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
     public function create_upload_markup() {
 
         $attr   = array('id' => 'upload_btn_container',
-                        'class' => 'mymedia upload button container');
+                        'class' => 'mymedia upload button');
 
         $output = html_writer::start_tag('span', $attr);
 
