@@ -135,7 +135,7 @@ M.local_mymedia.init_config = function (Y, panel_markup, dialog, conversion_scri
     var tab_view = new Y.TabView({srcNode:'#id_video_details_tab',
                                   visible: false,
                                   width: "500px",
-                                  height: "480px"});
+                                  height: "420px"});
 
     tab_view.render();
 

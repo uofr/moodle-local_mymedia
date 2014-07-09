@@ -148,11 +148,11 @@ div.mymedia.video.name {
 }
 
 .yui3-tabview-panel #share {
-    height:450px; width:490px; overflow:auto;
+    height:420px; width:490px; overflow:auto;
 }
 
 .yui3-tabview-panel #metadata, .yui3-tabview-panel #preview {
-    height:450px; width:490px;
+    height:420px; width:490px;
 }
 
 .mymedia .col_0 .paging {

@@ -40,7 +40,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         global $OUTPUT;
 
         $output      = '';
-        $max_columns = 3;
+        $max_columns = 2;
 
         $table = new html_table();
 
@@ -54,48 +54,42 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $i    = 0;
         $x    = 0;
         $data = array();
-
+        $vidcount = 0;
+        $myvideos ='';
+        
         foreach ($video_list as $key => $video) {
 
             if (KalturaEntryStatus::READY == $video->status) {
-                $data[] = $this->create_video_entry_markup($video);
+                $myvideos .= $this->create_video_entry_markup($video);
             } else {
-               $data[] = $this->create_video_entry_markup($video, false);
+               $myvideos .= $this->create_video_entry_markup($video, false);
             }
 
 
             // When the max number of columns is reached, add the data to the table object
-            if ($max_columns == count($data)) {
-
+            if ($max_columns == $vidcount) {
+                /*
                 $table->data[]       = $data;
                 $table->rowclasses[] = 'row_' . $i;
                 $data                = array();
                 $i++;
-
-            } else if ($x == count($video_list) -1 ) {
-
-                $left_over_cells = $max_columns - count($data);
-
-                // Add some extra cells to make the table symetrical
-                if ($left_over_cells) {
-                    for ($t = 1; $t <= $left_over_cells; $t++) {
-                        $data[] = '';
-                    }
-                }
-                $table->data[]       = $data;
-                $table->rowclasses[] = 'row_' . $i;
-
-            }
-
+                */
+                $vidcount = -1;
+                $myvideos .= '</div><div class="row-fluid">';
+            } 
+            $vidcount++;
             $x++;
         }
 
-        $attr   = array('style' => 'overflow:auto;overflow-y:hidden');
-        $output .= html_writer::start_tag('center');
+        $attr   = array('class' => 'row-fluid','id'=>'mymedia_vidoes');
+        //$output .= html_writer::start_tag('center');
         $output .= html_writer::start_tag('div', $attr);
-        $output .= html_writer::table($table);
+        $attr   = array('class' => 'row-fluid');
+        $output .= html_writer::start_tag('div', $attr);
+        $output .= $myvideos;//html_writer::table($table);
         $output .= html_writer::end_tag('div');
-        $output .= html_writer::end_tag('center');
+        $output .= html_writer::end_tag('div');
+        //$output .= html_writer::end_tag('center');
 
         echo $output;
     }
@@ -262,10 +256,10 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         $output .= html_writer::start_tag('div', $attr);
 
-        $attr    = array('src' => $url . '/width/150/height/100/type/3',
+        $attr    = array('src' => $url . '/width/180/height/130/type/3',
                          'alt' => $alt,
-                         'height' => 100,
-                         'width'  => 150,
+                         'height' => 130,
+                         'width'  => 180,
                          'title' => $alt);
         
         $a_attr   = array('class' => 'mymedia video preview',
@@ -413,7 +407,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         $output = '';
 
-        $attr   = array('class' => 'mymedia video entry',
+        $attr   = array('class' => 'mymedia video entry span4',
                         'id' => $entry->id);
 
         $output .= html_writer::start_tag('div', $attr);
