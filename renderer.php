@@ -671,16 +671,19 @@ class local_mymedia_renderer extends plugin_renderer_base {
         // Print site share checkbox
         $attr = array('type' => 'checkbox',
                       'name' => 'site_share',
-                      'class' => 'mymedia course checkbox site_share',
+                      'class' => 'mymedia course checkbox site_share hidden',
                       'id' => 'site_share',
                       'value' => '1',
                       'title' => get_string('site_share', 'local_mymedia'));
 
         $output .= html_writer::empty_tag('input', $attr);
 
-        $output .= '&nbsp;' . get_string('site_share', 'local_mymedia') . '<br /><br />';
+        $output .= html_writer::tag('label',get_string('site_share', 'local_mymedia'),array('for'=>'site_share','class'=>'hidden'));
 
-
+        $output .= html_writer::tag('p','Sharing videos with specific courses is only necessary if you want to allow other members to to be able to embed this media.');
+        
+        $output .= html_writer::tag('p','This media is shared with the course(s) selected below.');
+        
         // Print check all checkbox
         if (!empty($courses)) {
             $attr = array('type' => 'checkbox',
@@ -692,25 +695,26 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
             $output .= html_writer::empty_tag('input', $attr);
 
-            $output .= '&nbsp;' . get_string('check_all', 'local_mymedia') . '<br />';
+            $output .= html_writer::tag('label',get_string('check_all', 'local_mymedia'),array('for'=>'check_all')) . '<br />';
         }
 
         // Print beginning of table
         $attr = array('border' => 0,
-                      'class' => 'mymedia course checkbox table',
+                      'class' => 'row',
                       'id' => 'mymedia_courses_table');
 
-        $output .= html_writer::start_tag('table', $attr);
-
+        //$output .= html_writer::start_tag('table', $attr);
+        $output .= html_writer::start_tag('div', $attr);
 
         // Print courses and table cols/rows
         $attr = array('type' => 'checkbox',
                       'name' => 'enrolled_courses',
                       'class' => 'mymedia course chexkbox');
 
-        $row_attr = array('class' => 'mymedia course checkbox table row');
-        $col_attr = array('class' => 'mymedia course checkbox table col checkbox');
-        $col2_attr = array('class' => 'mymedia course checkbox table col name');
+        $row_attr = array('class' => 'mymedia course checkbox');
+        $col_attr = array('class' => 'mymedia course checkbox checkbox');
+        $col2_attr = array('class' => 'mymedia course checkbox name');
+        $divcount = 0;
         foreach ($courses as $course) {
 
             $checkbox_name = $course->fullname;
@@ -719,16 +723,27 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
             $checkbox = html_writer::empty_tag('input', $attr);
 
-            $output .= html_writer::start_tag('tr', $row_attr);
+            //$output .= html_writer::start_tag('tr', $row_attr);
+            
+            //$output .= html_writer::tag('td', $checkbox, $col_attr);
+            $oddrow = ($divcount % 2 == 0) ? ' odd' : '';
+            $col_attr = array('class' => 'mymedia course checkbox checkbox'.$oddrow);
+            
+            $output .= html_writer::start_tag('div', $col_attr);
+            
+            $output .= html_writer::start_tag('label');
+            
+            $output .= $checkbox;
+            $output .= $checkbox_name;
+            
+            $output .= html_writer::end_tag('label');
 
-            $output .= html_writer::tag('td', $checkbox, $col_attr);
+            $output .= html_writer::end_tag('div');
 
-            $output .= html_writer::tag('td', $checkbox_name, $col2_attr);
-
-            $output .= html_writer::end_tag('tr');
+            $divcount++;
         }
 
-        $output .= html_writer::end_tag('table');
+        $output .= html_writer::end_tag('div');
 
         $output .= html_writer::end_tag('div');
 
