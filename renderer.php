@@ -40,7 +40,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         global $OUTPUT;
 
         $output      = '';
-        $max_columns = 2;
+        $max_columns = 3;
 
         $table = new html_table();
 
@@ -54,42 +54,48 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $i    = 0;
         $x    = 0;
         $data = array();
-        $vidcount = 0;
-        $myvideos ='';
-        
+
         foreach ($video_list as $key => $video) {
 
             if (KalturaEntryStatus::READY == $video->status) {
-                $myvideos .= $this->create_video_entry_markup($video);
+                $data[] = $this->create_video_entry_markup($video);
             } else {
-               $myvideos .= $this->create_video_entry_markup($video, false);
+               $data[] = $this->create_video_entry_markup($video, false);
             }
 
 
             // When the max number of columns is reached, add the data to the table object
-            if ($max_columns == $vidcount) {
-                /*
+            if ($max_columns == count($data)) {
+
                 $table->data[]       = $data;
                 $table->rowclasses[] = 'row_' . $i;
                 $data                = array();
                 $i++;
-                */
-                $vidcount = -1;
-                $myvideos .= '</div><div class="row-fluid">';
-            } 
-            $vidcount++;
+
+            } else if ($x == count($video_list) -1 ) {
+
+                $left_over_cells = $max_columns - count($data);
+
+                // Add some extra cells to make the table symetrical
+                if ($left_over_cells) {
+                    for ($t = 1; $t <= $left_over_cells; $t++) {
+                        $data[] = '';
+                    }
+                }
+                $table->data[]       = $data;
+                $table->rowclasses[] = 'row_' . $i;
+
+            }
+
             $x++;
         }
 
-        $attr   = array('class' => 'row-fluid','id'=>'mymedia_vidoes');
-        //$output .= html_writer::start_tag('center');
+        $attr   = array('style' => 'overflow:auto;overflow-y:hidden');
+        $output .= html_writer::start_tag('center');
         $output .= html_writer::start_tag('div', $attr);
-        $attr   = array('class' => 'row-fluid');
-        $output .= html_writer::start_tag('div', $attr);
-        $output .= $myvideos;//html_writer::table($table);
+        $output .= html_writer::table($table);
         $output .= html_writer::end_tag('div');
-        $output .= html_writer::end_tag('div');
-        //$output .= html_writer::end_tag('center');
+        $output .= html_writer::end_tag('center');
 
         echo $output;
     }
@@ -148,7 +154,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $attr   = array('class' => 'mymedia upper row_0 upload search');
         $output .= html_writer::start_tag('tr', $attr);
 
-        $attr   = array('colspan' => 3, 'align' => '',
+        $attr   = array('colspan' => 3, 'align' => 'right',
                         'class' => 'mymedia upper col_0');
         $output .= html_writer::start_tag('td', $attr);
 
@@ -157,7 +163,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $screenrec     = '';
         $enable_ksr    = get_config(KALTURA_PLUGIN_NAME, 'enable_screen_recorder');
 
-        $context = get_context_instance(CONTEXT_USER, $USER->id);
+        $context = context_user::instance($USER->id);
 
         if (has_capability('local/mymedia:upload', $context, $USER)) {
             $upload = $this->create_upload_markup();
@@ -256,23 +262,14 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         $output .= html_writer::start_tag('div', $attr);
 
-        $attr    = array('src' => $url . '/width/180/height/130/type/3',
+        $attr    = array('src' => $url . '/width/150/height/100/type/3',
                          'alt' => $alt,
-                         'height' => 130,
-                         'width'  => 180,
+                         'height' => 100,
+                         'width'  => 150,
                          'title' => $alt);
-        
-        $a_attr   = array('class' => 'mymedia video preview',
-                     'href' => '#',
-                     'title' => get_string('preview_link', 'local_mymedia')
-                     );
 
-        $output .= html_writer::start_tag('a', $a_attr);
-        
         $output .= html_writer::empty_tag('img', $attr);
 
-        $output .= html_writer::end_tag('a');
-        
         $output .= html_writer::end_tag('div');
 
         return $output;
@@ -319,7 +316,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $attr   = array('class' => 'mymedia video share container');
         $output .= html_writer::start_tag('span', $attr);
 
-        $attr   = array('class' => 'mymedia video share btn',
+        $attr   = array('class' => 'mymedia video share',
                         'href' => '#',
                         'title' => get_string('share_link', 'local_mymedia')
                         );
@@ -340,7 +337,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         $attr   = array('class' => 'mymedia video edit container');
         $output .= html_writer::start_tag('span', $attr);
 
-        $attr   = array('class' => 'mymedia video edit btn',
+        $attr   = array('class' => 'mymedia video edit',
                         'href' => '#',
                         'title' => get_string('edit_link', 'local_mymedia')
                         );
@@ -358,7 +355,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         $output = '';
 
-        $attr   = array('class' => 'mymedia video clip container btn');
+        $attr   = array('class' => 'mymedia video clip container');
         $output .= html_writer::start_tag('span', $attr);
 
         $attr   = array('class' => 'mymedia video clip',
@@ -407,7 +404,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         $output = '';
 
-        $attr   = array('class' => 'mymedia video entry span4',
+        $attr   = array('class' => 'mymedia video entry',
                         'id' => $entry->id);
 
         $output .= html_writer::start_tag('div', $attr);
@@ -435,10 +432,10 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
         $output .= html_writer::start_tag('div', $attr);
 
-        $context = get_context_instance(CONTEXT_USER, $USER->id);
+        $context = context_user::instance($USER->id);
 
-        //$output .= $this->create_video_preview_link_markup();
-        //$output .= '&nbsp;&nbsp;';
+        $output .= $this->create_video_preview_link_markup();
+        $output .= '&nbsp;&nbsp;';
 
         if (has_capability('local/mymedia:editmetadata', $context, $USER)) {
             $output .= $this->create_video_edit_link_markup();
@@ -671,19 +668,16 @@ class local_mymedia_renderer extends plugin_renderer_base {
         // Print site share checkbox
         $attr = array('type' => 'checkbox',
                       'name' => 'site_share',
-                      'class' => 'mymedia course checkbox site_share hidden',
+                      'class' => 'mymedia course checkbox site_share',
                       'id' => 'site_share',
                       'value' => '1',
                       'title' => get_string('site_share', 'local_mymedia'));
 
         $output .= html_writer::empty_tag('input', $attr);
 
-        $output .= html_writer::tag('label',get_string('site_share', 'local_mymedia'),array('for'=>'site_share','class'=>'hidden'));
+        $output .= '&nbsp;' . get_string('site_share', 'local_mymedia') . '<br /><br />';
 
-        $output .= html_writer::tag('p','Sharing videos with specific courses is only necessary if you want to allow other members to to be able to embed this media.');
-        
-        $output .= html_writer::tag('p','This media is shared with the course(s) selected below.');
-        
+
         // Print check all checkbox
         if (!empty($courses)) {
             $attr = array('type' => 'checkbox',
@@ -695,26 +689,25 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
             $output .= html_writer::empty_tag('input', $attr);
 
-            $output .= html_writer::tag('label',get_string('check_all', 'local_mymedia'),array('for'=>'check_all')) . '<br />';
+            $output .= '&nbsp;' . get_string('check_all', 'local_mymedia') . '<br />';
         }
 
         // Print beginning of table
         $attr = array('border' => 0,
-                      'class' => 'row',
+                      'class' => 'mymedia course checkbox table',
                       'id' => 'mymedia_courses_table');
 
-        //$output .= html_writer::start_tag('table', $attr);
-        $output .= html_writer::start_tag('div', $attr);
+        $output .= html_writer::start_tag('table', $attr);
+
 
         // Print courses and table cols/rows
         $attr = array('type' => 'checkbox',
                       'name' => 'enrolled_courses',
                       'class' => 'mymedia course chexkbox');
 
-        $row_attr = array('class' => 'mymedia course checkbox');
-        $col_attr = array('class' => 'mymedia course checkbox checkbox');
-        $col2_attr = array('class' => 'mymedia course checkbox name');
-        $divcount = 0;
+        $row_attr = array('class' => 'mymedia course checkbox table row');
+        $col_attr = array('class' => 'mymedia course checkbox table col checkbox');
+        $col2_attr = array('class' => 'mymedia course checkbox table col name');
         foreach ($courses as $course) {
 
             $checkbox_name = $course->fullname;
@@ -723,27 +716,16 @@ class local_mymedia_renderer extends plugin_renderer_base {
 
             $checkbox = html_writer::empty_tag('input', $attr);
 
-            //$output .= html_writer::start_tag('tr', $row_attr);
-            
-            //$output .= html_writer::tag('td', $checkbox, $col_attr);
-            $oddrow = ($divcount % 2 == 0) ? ' odd' : '';
-            $col_attr = array('class' => 'mymedia course checkbox checkbox'.$oddrow);
-            
-            $output .= html_writer::start_tag('div', $col_attr);
-            
-            $output .= html_writer::start_tag('label');
-            
-            $output .= $checkbox;
-            $output .= $checkbox_name;
-            
-            $output .= html_writer::end_tag('label');
+            $output .= html_writer::start_tag('tr', $row_attr);
 
-            $output .= html_writer::end_tag('div');
+            $output .= html_writer::tag('td', $checkbox, $col_attr);
 
-            $divcount++;
+            $output .= html_writer::tag('td', $checkbox_name, $col2_attr);
+
+            $output .= html_writer::end_tag('tr');
         }
 
-        $output .= html_writer::end_tag('div');
+        $output .= html_writer::end_tag('table');
 
         $output .= html_writer::end_tag('div');
 
@@ -796,7 +778,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
         global $SESSION;
 
         $attr   = array('id' => 'simple_search_container',
-                        'class' => 'mymedia simple search');
+                        'class' => 'mymedia simple search container');
 
         $output = html_writer::start_tag('span', $attr);
 
@@ -853,7 +835,7 @@ class local_mymedia_renderer extends plugin_renderer_base {
     public function create_upload_markup() {
 
         $attr   = array('id' => 'upload_btn_container',
-                        'class' => 'mymedia upload button');
+                        'class' => 'mymedia upload button container');
 
         $output = html_writer::start_tag('span', $attr);
 

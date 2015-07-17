@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * My Media language file.
+ * My Media LTI launch page.
  *
  * @package    local_mymedia
  * @author     Remote-Learner.net Inc
@@ -23,8 +23,29 @@
  * @copyright  (C) 2014 Remote Learner.net Inc http://www.remote-learner.net
  */
 
-$string['heading_mymedia'] = 'My Media';
-$string['invalid_launch_parameters'] = 'Invalid launch parameters';
-$string['mymedia:view'] = 'View My Media page';
-$string['nav_mymedia'] = 'My Media';
-$string['pluginname'] = 'My Media';
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+require_once(dirname(dirname(dirname(__FILE__))).'/local/kaltura/locallib.php');
+
+global $USER;
+
+require_login();
+
+$context = context_user::instance($USER->id);
+require_capability('local/mymedia:view', $context);
+
+$launch = array();
+$launch['id'] = 1;
+$launch['cmid'] = 0;
+$launch['title'] = 'My Media';
+$launch['module'] = KAF_MYMEDIA_MODULE;
+$launch['course'] = $PAGE->course;
+$launch['width'] = '300';
+$launch['height'] = '300';
+$launch['custom_publishdata'] = '';
+
+if (local_kaltura_validate_mymedia_required_params($launch)) {
+    $content = local_kaltura_request_lti_launch($launch);
+    echo $content;
+} else {
+    echo get_string('invalid_launch_parameters', 'local_mymedia');
+}
