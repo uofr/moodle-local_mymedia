@@ -78,7 +78,9 @@ if (get_config(KALTURA_PLUGIN_NAME, 'enable_screen_recorder')) {
     $PAGE->requires->js('/local/kaltura/js/screenrecorder.js', true);
 }
 
-$courseid = get_courseid_from_context($PAGE->context);
+//$courseid = get_courseid_from_context($PAGE->context);
+$courseid = 1;//system level?
+//$context->get_course_context(false);//get_courseid_from_context($PAGE->context);
 
 if (local_kaltura_has_mobile_flavor_enabled() && local_kaltura_get_enable_html5()) {
     $uiconf_id = local_kaltura_get_player_uiconf('player_resource');
@@ -109,7 +111,8 @@ if ($data = data_submitted() and confirm_sesskey()) {
     }
 }
 
-$context = get_context_instance(CONTEXT_USER, $USER->id);
+//$context = get_context_instance(CONTEXT_USER, $USER->id);
+$context = context_user::instance($USER->id);
 
 require_capability('local/mymedia:view', $context, $USER);
 
