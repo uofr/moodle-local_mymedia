@@ -25,7 +25,7 @@ define('MYMEDIA_ITEMS_PER_PAGE', '9');
 /**
  * This function adds my media links to the navigation block
  */
-function local_mymedia_extends_navigation($navigation) {
+function local_mymedia_extend_navigation($navigation) {
 
     global $USER;
 
@@ -34,7 +34,7 @@ function local_mymedia_extends_navigation($navigation) {
 
     $node_home = $navigation->get('home');
 
-    $context = get_context_instance(CONTEXT_USER, $USER->id);
+    $context = context_user::instance($USER->id, IGNORE_MISSING);
 
     if ($node_home && has_capability('local/mymedia:view', $context, $USER)) {
         $node_mymedia = $node_home->add($mymedia, new moodle_url('/local/mymedia/mymedia.php'),
